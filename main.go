@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"crypto/tls"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -46,11 +47,15 @@ func main() {
 }
 
 func runClient(args Args) {
-
-	u := url.URL{Scheme: "ws", Host: args.Remote, Path: "/ws"}
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: true,
+	}
+	u := url.URL{Scheme: "wss", Host: args.Remote, Path: "/ws"}
 	log.Printf("connecting to %s", u.String())
-
-	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
+	dialer := &websocket.Dialer{
+		TLSClientConfig: tlsConfig,
+	}
+	c, _, err := dialer.Dial(u.String(), nil)
 
 	if err != nil {
 		panic(err)
